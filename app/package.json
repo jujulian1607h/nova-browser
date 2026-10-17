@@ -1,6 +1,6 @@
 {
   "name": "nova-browser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Night Browser - navigateur de bureau Electron",
   "main": "main.cjs",
   "author": "NOVA",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis",
-    "test": "node --test"
+    "test": "node --test *.test.cjs"
   },
   "dependencies": {
     "electron-updater": "^6.8.9"
@@ -36,6 +36,7 @@
     "files": [
       "main.cjs",
       "history-store.cjs",
+      "download-manager.cjs",
       "preload.cjs",
       "index.html",
       "renderer.js",
