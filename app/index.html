@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;">
+  <title>Night Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="chrome">
+    <div class="topline">
+      <div class="brand"><span class="brand-mark">N</span><span>NIGHT</span><small>BROWSER</small></div>
+      <div class="tab-strip" id="tabs"></div>
+      <button class="icon-btn new-tab" id="newTab" title="Nouvel onglet">＋</button>
+      <button class="private-btn" id="privateTab" title="Ouvrir un onglet privé">◉ <span>Privé</span></button>
+    </div>
+    <div class="toolbar">
+      <button class="icon-btn" id="back" title="Précédent">←</button>
+      <button class="icon-btn" id="forward" title="Suivant">→</button>
+      <button class="icon-btn" id="reload" title="Actualiser">↻</button>
+      <button class="icon-btn" id="home" title="Accueil">⌂</button>
+      <form id="addressForm" class="address-wrap">
+        <span class="lock">⌁</span>
+        <input id="address" autocomplete="off" spellcheck="false" placeholder="Rechercher ou saisir une adresse web…">
+        <button class="go-btn" type="submit">Aller ↗</button>
+      </form>
+      <button class="icon-btn bookmark" id="bookmark" title="Ajouter aux favoris">☆</button>
+      <button class="icon-btn" id="history" title="Afficher l’historique" aria-label="Afficher l’historique">◷</button>
+      <button class="icon-btn" id="openExternal" title="Ouvrir dans le navigateur système">↗</button>
+    </div>
+    <div class="statusline">
+      <span class="status-dot"></span><span id="status">PRÊT POUR EXPLORER</span>
+      <span class="status-right">NAVIGATION INTÉGRÉE <i>•</i> NIGHT CORE</span>
+    </div>
+  </header>
+  <main class="page-overlay">
+    <section class="history-panel" id="historyPanel" aria-labelledby="historyTitle" aria-hidden="true">
+      <div class="history-heading">
+        <div>
+          <h1 id="historyTitle">Historique</h1>
+          <p>Vos 1 000 visites récentes, enregistrées sur cet appareil. Les onglets privés ne sont pas enregistrés.</p>
+        </div>
+        <div class="history-actions">
+          <button class="history-action" id="clearHistory" type="button">Effacer l’historique</button>
+          <button class="history-action history-close" id="closeHistory" type="button" aria-label="Fermer l’historique">×</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList" aria-live="polite"></div>
+    </section>
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>
