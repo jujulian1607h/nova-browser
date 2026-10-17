@@ -1,23 +1,27 @@
 # NOVA Browser
 
-NOVA Browser is a Windows browser installer, presented with a futuristic design and an experience intended to feel fast.
+NOVA Browser 1.0.1 est un navigateur de bureau Windows construit avec Electron, avec une interface futuriste pensée pour une navigation fluide.
 
-## Download
+## Télécharger
 
-Download `NOVA.Browser.Setup.1.0.0.exe` from the [v1.0.0 GitHub Release](https://github.com/jujulian1607h/nova-browser/releases/tag/v1.0.0).
+Téléchargez [`NOVA-Browser-Setup-1.0.1.exe`](https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.1/NOVA-Browser-Setup-1.0.1.exe) depuis la [Release 1.0.1](https://github.com/jujulian1607h/nova-browser/releases/tag/v1.0.1).
 
-> **Security notice:** This installer is not digitally signed. Its publisher could not be verified, and no security audit is claimed here. Only install it if you trust its source.
+Ce dépôt étant privé, seuls le propriétaire du dépôt et les collaborateurs autorisés peuvent accéder au téléchargement.
 
-## Verify the download
+> **Avis de sécurité :** l’installateur n’est pas signé numériquement. Windows ne peut donc pas vérifier l’identité de son éditeur à partir d’une signature. Aucune certification ni aucun audit de sécurité n’est revendiqué. N’installez le fichier que si vous faites confiance à sa provenance.
 
-SHA-256:
+## Vérifier le téléchargement
+
+SHA-256 :
 
 ```text
-C0E1401A9FFD3AD27F3D5B8BA41C206F30179E87CC3A3E8F99E74DDDFF4009E0
+11634470B3ED00F0F31DCFBE12CF47B7D3A2F28D5760205882164E0006416967
 ```
 
-To calculate the hash in PowerShell:
+Dans PowerShell :
 
 ```powershell
-Get-FileHash ".\NOVA Browser Setup 1.0.0.exe" -Algorithm SHA256
+Get-FileHash ".\NOVA-Browser-Setup-1.0.1.exe" -Algorithm SHA256
 ```
+
+La Release comprend aussi `latest.yml` et le fichier `.blockmap` utilisés par le mécanisme de mise à jour de l’application.
