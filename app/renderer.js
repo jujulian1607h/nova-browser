@@ -5,7 +5,10 @@ const statusEl = $('status');
 const toast = $('toast');
 const historyPanel = $('historyPanel');
 const historyList = $('historyList');
+const downloadsPanel = $('downloadsPanel');
+const downloadList = $('downloadList');
 let state = { tabs: [], activeTabId: null };
+let downloads = [];
 let toastTimeout;
 const historyDateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -18,6 +21,108 @@ function notify(message) {
 
 function shortTitle(title) {
   return (title || 'Nouvel onglet').replace(/\s+/g, ' ').trim().slice(0, 25) || 'Nouvel onglet';
+}
+
+function hidePanels() {
+  historyPanel.classList.remove('visible');
+  historyPanel.setAttribute('aria-hidden', 'true');
+  downloadsPanel.classList.remove('visible');
+  downloadsPanel.setAttribute('aria-hidden', 'true');
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} o`;
+  const units = ['Ko', 'Mo', 'Go', 'To'];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  return `${value.toFixed(1)} ${units[unitIndex]}`;
+}
+
+function renderDownloads() {
+  downloadList.replaceChildren();
+  const activeCount = downloads.filter((download) => download.state === 'progressing').length;
+  const count = $('downloadCount');
+  count.hidden = activeCount === 0;
+  count.textContent = String(activeCount);
+  $('downloads').setAttribute('aria-label', activeCount ? `Téléchargements, ${activeCount} en cours` : 'Afficher les téléchargements');
+
+  if (downloads.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'history-empty';
+    empty.textContent = 'Aucun téléchargement pour le moment.';
+    downloadList.append(empty);
+    return;
+  }
+
+  for (const download of downloads) {
+    const item = document.createElement('article');
+    item.className = 'download-entry';
+    const details = document.createElement('div');
+    details.className = 'download-details';
+    const name = document.createElement('strong');
+    name.textContent = download.fileName;
+    const status = document.createElement('span');
+    status.className = 'download-status';
+    const progress = document.createElement('progress');
+    progress.max = 100;
+    progress.value = download.progress;
+    if (download.state === 'progressing') {
+      status.textContent = `${formatBytes(download.receivedBytes)} / ${download.totalBytes ? formatBytes(download.totalBytes) : 'taille inconnue'} · ${download.progress}%`;
+    } else if (download.state === 'completed') {
+      status.textContent = `Terminé · ${formatBytes(download.totalBytes)}`;
+    } else {
+      status.textContent = download.state === 'cancelled' ? 'Annulé' : 'Échec du téléchargement';
+    }
+    if (download.privateMode) status.textContent += ' · onglet privé';
+    details.append(name, status);
+    if (download.state === 'progressing') details.append(progress);
+    const actions = document.createElement('div');
+    actions.className = 'download-actions';
+    if (download.state === 'progressing') {
+      const cancel = document.createElement('button');
+      cancel.className = 'history-action';
+      cancel.type = 'button';
+      cancel.textContent = 'Annuler';
+      cancel.addEventListener('click', async () => {
+        try {
+          await window.nova.cancelDownload(download.id);
+        } catch {
+          notify('Impossible d’annuler ce téléchargement.');
+        }
+      });
+      actions.append(cancel);
+    } else if (download.state === 'completed') {
+      const open = document.createElement('button');
+      open.className = 'history-action';
+      open.type = 'button';
+      open.textContent = 'Ouvrir';
+      open.addEventListener('click', async () => {
+        try {
+          await window.nova.openDownloadedFile(download.id);
+        } catch {
+          notify('Impossible d’ouvrir ce fichier.');
+        }
+      });
+      const reveal = document.createElement('button');
+      reveal.className = 'history-action';
+      reveal.type = 'button';
+      reveal.textContent = 'Afficher';
+      reveal.addEventListener('click', async () => {
+        try {
+          await window.nova.showDownloadedFile(download.id);
+        } catch {
+          notify('Impossible d’afficher ce fichier.');
+        }
+      });
+      actions.append(open, reveal);
+    }
+    item.append(details, actions);
+    downloadList.append(item);
+  }
 }
 
 function renderTabs() {
@@ -55,6 +160,10 @@ window.nova.onTabsState((next) => {
   renderTabs();
 });
 window.nova.onError((message) => notify(message));
+window.nova.onDownloadsState((next) => {
+  downloads = next;
+  renderDownloads();
+});
 
 function renderHistory(entries) {
   historyList.replaceChildren();
@@ -82,8 +191,7 @@ function renderHistory(entries) {
     item.addEventListener('click', async () => {
       try {
         await window.nova.closeHistory();
-        historyPanel.classList.remove('visible');
-        historyPanel.setAttribute('aria-hidden', 'true');
+        hidePanels();
         window.nova.navigate(entry.url);
       } catch {
         notify('Impossible de fermer l’historique.');
@@ -96,6 +204,8 @@ function renderHistory(entries) {
 $('history').addEventListener('click', async () => {
   try {
     renderHistory(await window.nova.openHistory());
+    downloadsPanel.classList.remove('visible');
+    downloadsPanel.setAttribute('aria-hidden', 'true');
     historyPanel.classList.add('visible');
     historyPanel.setAttribute('aria-hidden', 'false');
   } catch {
@@ -105,8 +215,7 @@ $('history').addEventListener('click', async () => {
 $('closeHistory').addEventListener('click', async () => {
   try {
     await window.nova.closeHistory();
-    historyPanel.classList.remove('visible');
-    historyPanel.setAttribute('aria-hidden', 'true');
+    hidePanels();
   } catch {
     notify('Impossible de fermer l’historique.');
   }
@@ -117,6 +226,26 @@ $('clearHistory').addEventListener('click', async () => {
     notify('Historique effacé.');
   } catch {
     notify('Impossible d’effacer l’historique.');
+  }
+});
+$('downloads').addEventListener('click', async () => {
+  try {
+    downloads = await window.nova.openDownloads();
+    renderDownloads();
+    historyPanel.classList.remove('visible');
+    historyPanel.setAttribute('aria-hidden', 'true');
+    downloadsPanel.classList.add('visible');
+    downloadsPanel.setAttribute('aria-hidden', 'false');
+  } catch {
+    notify('Impossible de charger les téléchargements.');
+  }
+});
+$('closeDownloads').addEventListener('click', async () => {
+  try {
+    await window.nova.closeDownloads();
+    hidePanels();
+  } catch {
+    notify('Impossible de fermer les téléchargements.');
   }
 });
 
@@ -164,5 +293,9 @@ document.addEventListener('keydown', (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'h') {
     event.preventDefault();
     $('history').click();
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'j') {
+    event.preventDefault();
+    $('downloads').click();
   }
 });
