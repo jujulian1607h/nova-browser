@@ -8,4 +8,4 @@ Night Browser est un navigateur de bureau Windows au design nocturne, avec ongle
 
 L'historique conserve localement les 1 000 visites récentes et exclut les onglets privés. Il peut être effacé depuis l'application.
 
-> **Avis de sécurité :** l'installateur n'est pas signé numériquement. Aucune certification ni aucun audit de sécurité n'est revendiqué. SHA-256 : `C043DB9B473E7769A26D70D1DEF6A52F84382C6D5F256136A27AC5F08929FDDC`
+> **Avis de sécurité :** l'installateur n'est pas signé numériquement. Aucune certification ni aucun audit de sécurité n'est revendiqué. SHA-256 : `E3FDA945F63362A013C0B1C56FEA56CAEED3BC02EE8505677DAEE17C693D66FF`
