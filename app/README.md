@@ -1,4 +1,4 @@
-# Night Browser 1.0.3 — application Windows
+# Night Browser 1.0.4 — application Windows
 
 Night Browser est un navigateur Electron avec une vraie zone de navigation intégrée (pas d'iframe), plusieurs onglets, recherche web, favoris locaux et onglets privés.
 
@@ -31,11 +31,11 @@ Dans le même terminal :
 npm run dist
 ```
 
-Quand la compilation se termine, cherchez le dossier `release`. Il contiendra un installateur du type `Night-Browser-Setup-1.0.3.exe`. Sans certificat de signature, l’installateur de développement sera non signé et Windows pourra afficher un avertissement.
+Quand la compilation se termine, cherchez le dossier `release`. Il contiendra un installateur du type `Night-Browser-Setup-1.0.4.exe`. Sans certificat de signature, l’installateur de développement sera non signé et Windows pourra afficher un avertissement.
 
 ## Publication signée et mises à jour
 
-La version 1.0.2 publiée actuellement est non signée. Pour les prochaines versions signées, le workflow GitHub Actions exige deux secrets dans **Settings → Secrets and variables → Actions** :
+La version 1.0.4 publiée actuellement est non signée. Pour les prochaines versions signées, le workflow GitHub Actions exige deux secrets dans **Settings → Secrets and variables → Actions** :
 
 - `NOVA_WINDOWS_CERT_BASE64` : contenu Base64 d’un certificat `.pfx` de signature de code.
 - `NOVA_WINDOWS_CERT_PASSWORD` : mot de passe du certificat.
@@ -53,7 +53,7 @@ Le verrou `package-lock.json` rend les installations de publication reproductibl
 Pour vérifier une version installée ou téléchargée :
 
 ```powershell
-Get-AuthenticodeSignature ".\Night-Browser-Setup-1.0.3.exe" |
+Get-AuthenticodeSignature ".\Night-Browser-Setup-1.0.4.exe" |
   Format-List Status, StatusMessage, SignerCertificate
 ```
 
@@ -64,6 +64,8 @@ Get-AuthenticodeSignature ".\Night-Browser-Setup-1.0.3.exe" |
 - Barre d'adresse : saisissez une URL ou une recherche
 - Retour, suivant, actualisation et accueil
 - Historique local des 1 000 dernières visites, consultable avec le bouton d’historique ou Ctrl+H et effaçable à la demande
+- Gestionnaire de téléchargements intégré à la barre d’outils (Ctrl+J), avec progression, annulation et accès aux fichiers terminés
+- Barre de navigation, fenêtre et onglets plus compacts
 - Favoris enregistrés localement sur cet ordinateur
 - Onglets privés isolés dans des partitions non persistantes
 - Bouton pour ouvrir la page dans le navigateur système
@@ -72,7 +74,7 @@ Get-AuthenticodeSignature ".\Night-Browser-Setup-1.0.3.exe" |
 
 - Le mode privé de ce prototype isole les cookies et le stockage de la session normale ; il ne rend pas anonyme sur Internet et ne protège pas contre les sites, le réseau ou le fournisseur d'accès.
 - Les favoris et l’historique sont enregistrés localement sur cet ordinateur. L’historique est limité aux 1 000 visites récentes ; les onglets privés n’y figurent pas.
-- La synchronisation, les extensions et la gestion avancée des téléchargements ne sont pas encore implémentées.
+- La synchronisation et les extensions ne sont pas encore implémentées.
 - Les sites peuvent encore refuser l'accès, demander une authentification ou bloquer certains usages pour leurs propres raisons. Electron évite la limitation des iframes, mais ne contourne pas les protections des sites.
 - Une signature valide confirme l’identité du signataire et l’intégrité du fichier depuis sa signature ; elle ne garantit pas l’absence de vulnérabilités.
 - Ne désactivez pas `contextIsolation`, ne réactivez pas `nodeIntegration` et n'ajoutez pas de pont IPC généraliste exposant toutes les API Node au contenu web.
