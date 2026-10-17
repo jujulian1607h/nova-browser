@@ -56,4 +56,6 @@ test('reports malformed history data instead of silently discarding it', async (
   await fs.writeFile(store.filePath, '{invalid', 'utf8');
 
   await assert.rejects(store.load(), SyntaxError);
+  await store.clear();
+  assert.deepEqual(await store.load(), []);
 });
