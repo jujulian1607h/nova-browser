@@ -38,7 +38,6 @@ class HistoryStore {
 
   clear() {
     return this.enqueue(async () => {
-      await this.ensureLoaded();
       this.entries = [];
       await this.persist();
     });
