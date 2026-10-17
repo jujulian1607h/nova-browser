@@ -4,7 +4,7 @@ NOVA Browser is a Windows browser installer, presented with a futuristic design 
 
 ## Download
 
-Download `NOVA Browser Setup 1.0.0.exe` from the [v1.0.0 GitHub Release](https://github.com/jujulian1607h/nova-browser/releases/tag/v1.0.0).
+Download `NOVA.Browser.Setup.1.0.0.exe` from the [v1.0.0 GitHub Release](https://github.com/jujulian1607h/nova-browser/releases/tag/v1.0.0).
 
 > **Security notice:** This installer is not digitally signed. Its publisher could not be verified, and no security audit is claimed here. Only install it if you trust its source.
 
