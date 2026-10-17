@@ -27,6 +27,7 @@
       </form>
       <button class="icon-btn bookmark" id="bookmark" title="Ajouter aux favoris">☆</button>
       <button class="icon-btn" id="history" title="Afficher l’historique" aria-label="Afficher l’historique">◷</button>
+      <button class="icon-btn downloads-button" id="downloads" title="Afficher les téléchargements" aria-label="Afficher les téléchargements">↓<span class="download-count" id="downloadCount" hidden></span></button>
       <button class="icon-btn" id="openExternal" title="Ouvrir dans le navigateur système">↗</button>
     </div>
     <div class="statusline">
@@ -47,6 +48,16 @@
         </div>
       </div>
       <div class="history-list" id="historyList" aria-live="polite"></div>
+    </section>
+    <section class="downloads-panel" id="downloadsPanel" aria-labelledby="downloadsTitle" aria-hidden="true">
+      <div class="history-heading">
+        <div>
+          <h1 id="downloadsTitle">Téléchargements</h1>
+          <p>Les fichiers sont enregistrés dans le dossier Téléchargements de Windows.</p>
+        </div>
+        <button class="history-action history-close" id="closeDownloads" type="button" aria-label="Fermer les téléchargements">×</button>
+      </div>
+      <div class="download-list" id="downloadList" aria-live="polite"></div>
     </section>
     <div class="toast" id="toast" role="status"></div>
   </main>
