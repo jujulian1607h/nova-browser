@@ -6,7 +6,6 @@ NOVA Browser 1.0.1 est un navigateur de bureau Windows construit avec Electron, 
 
 Téléchargez [`NOVA-Browser-Setup-1.0.1.exe`](https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.1/NOVA-Browser-Setup-1.0.1.exe) depuis la [Release 1.0.1](https://github.com/jujulian1607h/nova-browser/releases/tag/v1.0.1).
 
-Ce dépôt étant privé, seuls le propriétaire du dépôt et les collaborateurs autorisés peuvent accéder au téléchargement.
 
 > **Avis de sécurité :** l’installateur n’est pas signé numériquement. Windows ne peut donc pas vérifier l’identité de son éditeur à partir d’une signature. Aucune certification ni aucun audit de sécurité n’est revendiqué. N’installez le fichier que si vous faites confiance à sa provenance.
 
