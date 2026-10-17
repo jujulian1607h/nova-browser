@@ -1,0 +1,109 @@
+name: Signed Windows release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: Check release version
+        shell: pwsh
+        run: |
+          $tagVersion = $env:GITHUB_REF_NAME.TrimStart('v')
+          $packageVersion = node -p "require('./package.json').version"
+          if ($tagVersion -ne $packageVersion) {
+            throw "Tag version $tagVersion does not match package version $packageVersion."
+          }
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test history storage
+        run: npm test
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Audit locked dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Prepare signing certificate
+        shell: pwsh
+        env:
+          NOVA_WINDOWS_CERT_BASE64: ${{ secrets.NOVA_WINDOWS_CERT_BASE64 }}
+          NOVA_WINDOWS_CERT_PASSWORD: ${{ secrets.NOVA_WINDOWS_CERT_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:NOVA_WINDOWS_CERT_BASE64)) {
+            throw "Set the NOVA_WINDOWS_CERT_BASE64 repository secret before publishing."
+          }
+          if ([string]::IsNullOrWhiteSpace($env:NOVA_WINDOWS_CERT_PASSWORD)) {
+            throw "Set the NOVA_WINDOWS_CERT_PASSWORD repository secret before publishing."
+          }
+          $certificatePath = Join-Path $env:RUNNER_TEMP "nova-code-signing.pfx"
+          $certificateBytes = [Convert]::FromBase64String($env:NOVA_WINDOWS_CERT_BASE64)
+          [IO.File]::WriteAllBytes($certificatePath, $certificateBytes)
+          "CSC_LINK=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Build signed installer
+        run: npm run dist -- --publish never
+        env:
+          CSC_KEY_PASSWORD: ${{ secrets.NOVA_WINDOWS_CERT_PASSWORD }}
+
+      - name: Verify installer signature
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem -LiteralPath "release" -Filter "*.exe" -File)
+          if ($installers.Count -eq 0) {
+            throw "No Windows installer was produced."
+          }
+          foreach ($installer in $installers) {
+            $signature = Get-AuthenticodeSignature -LiteralPath $installer.FullName
+            if ($signature.Status -ne "Valid") {
+              throw "Invalid signature for $($installer.Name): $($signature.StatusMessage)"
+            }
+            Write-Host "$($installer.Name) signed by $($signature.SignerCertificate.Subject)"
+          }
+          if (-not (Test-Path -LiteralPath "release\latest.yml")) {
+            throw "electron-builder did not produce latest.yml; automatic updates cannot be published."
+          }
+          $metadata = Get-Content -LiteralPath "release\latest.yml" -Raw
+          $updateAsset = [regex]::Match($metadata, '(?m)^\s+- url: (.+)$').Groups[1].Value.Trim()
+          if ([string]::IsNullOrWhiteSpace($updateAsset) -or
+              -not (Test-Path -LiteralPath (Join-Path "release" $updateAsset))) {
+            throw "latest.yml references a missing installer: $updateAsset"
+          }
+
+      - name: Create GitHub release and upload update files
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          gh release create $env:GITHUB_REF_NAME --verify-tag --title "Night Browser $version" --generate-notes
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not create the GitHub release."
+          }
+          $assets = @(Get-ChildItem -LiteralPath "release" -File)
+          foreach ($asset in $assets) {
+            gh release upload $env:GITHUB_REF_NAME $asset.FullName
+            if ($LASTEXITCODE -ne 0) {
+              throw "Could not upload release asset $($asset.Name)."
+            }
+          }
