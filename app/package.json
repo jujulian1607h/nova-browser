@@ -1,0 +1,63 @@
+{
+  "name": "nova-browser",
+  "version": "1.0.3",
+  "description": "Night Browser - navigateur de bureau Electron",
+  "main": "main.cjs",
+  "author": "NOVA",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "26.15.3"
+  },
+  "overrides": {
+    "@electron/get": "5.1.0"
+  },
+  "build": {
+    "appId": "com.nova.browser",
+    "productName": "Night Browser",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "jujulian1607h",
+        "repo": "nova-browser"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "history-store.cjs",
+      "preload.cjs",
+      "index.html",
+      "renderer.js",
+      "styles.css",
+      "package.json"
+    ],
+    "win": {
+      "artifactName": "Night-Browser-Setup-${version}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
