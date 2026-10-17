@@ -3,14 +3,24 @@ const { autoUpdater } = require('electron-updater');
 const { randomUUID } = require('node:crypto');
 const path = require('node:path');
 const { HistoryStore } = require('./history-store.cjs');
+const { DownloadManager } = require('./download-manager.cjs');
 
 let win;
 let tabs = new Map();
 let activeTabId = null;
 let nextTabId = 1;
-let historyPanelVisible = false;
+let activePanel = null;
 const historyStore = new HistoryStore(path.join(app.getPath('userData'), 'history.json'));
-const TOOLBAR_HEIGHT = 148;
+const TOOLBAR_HEIGHT = 112;
+const downloadManager = new DownloadManager({
+  directory: app.getPath('downloads'),
+  onChange: (downloads) => {
+    if (win && !win.isDestroyed()) win.webContents.send('downloads:state', downloads);
+  },
+  onError: reportBrowserError,
+  openPath: (filePath) => shell.openPath(filePath),
+  revealPath: (filePath) => shell.showItemInFolder(filePath)
+});
 
 function reportBrowserError(message) {
   if (win && !win.isDestroyed()) win.webContents.send('browser:error', message);
@@ -64,7 +74,7 @@ function setViewBounds() {
       x: 0,
       y: TOOLBAR_HEIGHT,
       width: Math.max(0, width),
-      height: historyPanelVisible ? 0 : Math.max(0, height - TOOLBAR_HEIGHT)
+      height: activePanel ? 0 : Math.max(0, height - TOOLBAR_HEIGHT)
     });
   }
 }
@@ -142,6 +152,7 @@ function createTab(initialUrl = 'https://www.google.com/', privateMode = false) 
       partition: privateMode ? `nova-private-${id}` : 'persist:nova'
     }
   });
+  downloadManager.attachSession(view.webContents.session, privateMode);
   const tab = { id, view, title: 'Nouvel onglet', url: '', loading: false, privateMode };
   tabs.set(id, tab);
   win.contentView.addChildView(view);
@@ -164,7 +175,7 @@ function activateTab(id) {
   if (!selected) return;
   activeTabId = selected.id;
   for (const tab of tabs.values()) {
-    tab.view.setVisible(!historyPanelVisible && tab.id === activeTabId);
+    tab.view.setVisible(!activePanel && tab.id === activeTabId);
   }
   setViewBounds();
   sendState();
@@ -225,10 +236,10 @@ function configureAutoUpdates() {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1440,
-    height: 920,
-    minWidth: 900,
-    minHeight: 600,
+    width: 1280,
+    height: 820,
+    minWidth: 760,
+    minHeight: 520,
     backgroundColor: '#080b14',
     title: 'Night Browser',
     webPreferences: {
@@ -278,19 +289,34 @@ app.whenReady().then(() => {
   });
   ipcMain.handle('history:open', async () => {
     const entries = await historyStore.load();
-    historyPanelVisible = true;
+    activePanel = 'history';
     for (const tab of tabs.values()) tab.view.setVisible(false);
     setViewBounds();
     return entries;
   });
   ipcMain.handle('history:close', () => {
-    historyPanelVisible = false;
+    if (activePanel !== 'history') return;
+    activePanel = null;
     if (activeTabId !== null) activateTab(activeTabId);
   });
   ipcMain.handle('history:clear', async () => {
     await historyStore.clear();
     return [];
   });
+  ipcMain.handle('downloads:open', () => {
+    activePanel = 'downloads';
+    for (const tab of tabs.values()) tab.view.setVisible(false);
+    setViewBounds();
+    return downloadManager.list();
+  });
+  ipcMain.handle('downloads:close', () => {
+    if (activePanel !== 'downloads') return;
+    activePanel = null;
+    if (activeTabId !== null) activateTab(activeTabId);
+  });
+  ipcMain.handle('downloads:cancel', (_event, id) => downloadManager.cancel(id));
+  ipcMain.handle('downloads:open-file', (_event, id) => downloadManager.open(id));
+  ipcMain.handle('downloads:show-file', (_event, id) => downloadManager.reveal(id));
 
   createWindow();
   app.on('activate', () => {
