@@ -39,14 +39,14 @@ Les paquets AppImage et Debian x86_64 sont créés dans `release`.
 ### Lancer l’AppImage
 
 ```sh
-chmod +x Night-Browser-1.0.5-x64.AppImage
-./Night-Browser-1.0.5-x64.AppImage
+chmod +x Night-Browser-1.0.5-x86_64.AppImage
+./Night-Browser-1.0.5-x86_64.AppImage
 ```
 
 ### Installer sur Debian ou Ubuntu
 
 ```sh
-sudo apt install ./Night-Browser-1.0.5-x64.deb
+sudo apt install ./Night-Browser-1.0.5-amd64.deb
 ```
 
 ## Publication et mises à jour
