@@ -4,7 +4,10 @@
   "description": "Night Browser - navigateur de bureau Electron",
   "homepage": "https://jujulian1607h.github.io/nova-browser/",
   "main": "main.cjs",
-  "author": "NOVA",
+  "author": {
+    "name": "NOVA",
+    "email": "222992817+jujulian1607h@users.noreply.github.com"
+  },
   "license": "MIT",
   "scripts": {
     "start": "electron .",
