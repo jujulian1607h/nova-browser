@@ -1,6 +1,6 @@
 {
   "name": "nova-browser",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Night Browser - navigateur de bureau Electron",
   "main": "main.cjs",
   "author": "NOVA",
@@ -8,7 +8,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis",
-    "test": "node --test *.test.cjs"
+    "dist:linux": "electron-builder --linux AppImage deb",
+    "test": "node --test *.test.cjs website/*.test.cjs"
   },
   "dependencies": {
     "electron-updater": "^6.8.9"
@@ -59,6 +60,26 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Network",
+      "synopsis": "Navigateur web Night Browser",
+      "description": "Night Browser est un navigateur de bureau avec onglets, favoris, historique local et gestionnaire de telechargements.",
+      "artifactName": "Night-Browser-${version}-${arch}.${ext}"
     }
   }
 }
