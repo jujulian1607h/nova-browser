@@ -142,8 +142,8 @@ jobs:
       - name: Verify Linux release files
         run: |
           version="$(node -p "require('./package.json').version")"
-          test -f "release/Night-Browser-${version}-x64.AppImage"
-          test -f "release/Night-Browser-${version}-x64.deb"
+          test -f "release/Night-Browser-${version}-x86_64.AppImage"
+          test -f "release/Night-Browser-${version}-amd64.deb"
           test -f release/latest-linux.yml
 
       - name: Upload Linux release files
