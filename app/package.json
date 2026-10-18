@@ -1,7 +1,7 @@
 {
   "name": "nova-browser",
-  "version": "1.0.5",
-  "description": "Night Browser - navigateur de bureau Electron",
+  "version": "1.1.0",
+  "description": "Night Browser - navigateur de bureau Electron avec bloqueur de publicités",
   "homepage": "https://jujulian1607h.github.io/nova-browser/",
   "main": "main.cjs",
   "author": {
@@ -42,6 +42,7 @@
       "main.cjs",
       "history-store.cjs",
       "download-manager.cjs",
+      "ad-blocker.cjs",
       "preload.cjs",
       "index.html",
       "renderer.js",
@@ -82,7 +83,7 @@
       ],
       "category": "Network",
       "synopsis": "Navigateur web Night Browser",
-      "description": "Night Browser est un navigateur de bureau avec onglets, favoris, historique local et gestionnaire de telechargements.",
+      "description": "Night Browser est un navigateur de bureau avec onglets, favoris, historique local, bloqueur de publicites et gestionnaire de telechargements.",
       "artifactName": "Night-Browser-${version}-${arch}.${ext}"
     }
   }

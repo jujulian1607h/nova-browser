@@ -19,7 +19,13 @@ contextBridge.exposeInMainWorld('nova', {
   cancelDownload: (id) => ipcRenderer.invoke('downloads:cancel', id),
   openDownloadedFile: (id) => ipcRenderer.invoke('downloads:open-file', id),
   showDownloadedFile: (id) => ipcRenderer.invoke('downloads:show-file', id),
+  openAdBlocker: () => ipcRenderer.invoke('adblocker:open'),
+  closeAdBlocker: () => ipcRenderer.invoke('adblocker:close'),
+  setAdBlockerEnabled: (enabled) => ipcRenderer.invoke('adblocker:toggle', enabled),
+  toggleAdBlockerSite: () => ipcRenderer.invoke('adblocker:toggle-site'),
+  refreshAdBlockerFilters: () => ipcRenderer.invoke('adblocker:refresh'),
   onTabsState: (callback) => ipcRenderer.on('tabs:state', (_event, state) => callback(state)),
   onDownloadsState: (callback) => ipcRenderer.on('downloads:state', (_event, downloads) => callback(downloads)),
+  onAdBlockerState: (callback) => ipcRenderer.on('adblocker:state', (_event, state) => callback(state)),
   onError: (callback) => ipcRenderer.on('browser:error', (_event, message) => callback(message))
 });

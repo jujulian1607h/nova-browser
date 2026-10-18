@@ -1,19 +1,19 @@
 (function () {
   const downloads = {
     windows: {
-      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-Setup-1.0.5.exe',
+      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.1.0/Night-Browser-Setup-1.1.0.exe',
       label: 'Télécharger pour Windows',
-      info: 'Version 1.0.5 · Windows 10/11 · 64 bits'
+      info: 'Version 1.1.0 · Windows 10/11 · 64 bits'
     },
     linux: {
-      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-x86_64.AppImage',
+      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.1.0/Night-Browser-1.1.0-x86_64.AppImage',
       label: 'Télécharger pour Linux (AppImage)',
-      info: 'Version 1.0.5 · Linux x86_64 · AppImage'
+      info: 'Version 1.1.0 · Linux x86_64 · AppImage'
     },
     deb: {
-      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-amd64.deb',
+      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.1.0/Night-Browser-1.1.0-amd64.deb',
       label: 'Télécharger pour Debian / Ubuntu (.deb)',
-      info: 'Version 1.0.5 · Debian / Ubuntu · x86_64'
+      info: 'Version 1.1.0 · Debian / Ubuntu · x86_64'
     }
   };
 

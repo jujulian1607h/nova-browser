@@ -5,10 +5,12 @@ const statusEl = $('status');
 const toast = $('toast');
 const historyPanel = $('historyPanel');
 const historyList = $('historyList');
+const adBlockerPanel = $('adBlockerPanel');
 const downloadsPanel = $('downloadsPanel');
 const downloadList = $('downloadList');
 let state = { tabs: [], activeTabId: null };
 let downloads = [];
+let adBlockerState = null;
 let toastTimeout;
 const historyDateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -28,6 +30,30 @@ function hidePanels() {
   historyPanel.setAttribute('aria-hidden', 'true');
   downloadsPanel.classList.remove('visible');
   downloadsPanel.setAttribute('aria-hidden', 'true');
+  adBlockerPanel.classList.remove('visible');
+  adBlockerPanel.setAttribute('aria-hidden', 'true');
+}
+
+function renderAdBlocker(state) {
+  adBlockerState = state;
+  const count = $('adBlockerCount');
+  count.hidden = state.blockedCount === 0;
+  count.textContent = state.blockedCount > 99 ? '99+' : String(state.blockedCount);
+  $('adBlocker').setAttribute('aria-label', `Bloqueur ${state.enabled ? 'actif' : 'inactif'}, ${state.blockedCount} requêtes bloquées`);
+  $('adBlocker').title = state.enabled ? 'Bloqueur actif — ouvrir les paramètres' : 'Bloqueur inactif — ouvrir les paramètres';
+  $('toggleAdBlocker').textContent = state.enabled ? 'Désactiver le bloqueur' : 'Activer le bloqueur';
+  $('toggleAdBlocker').setAttribute('aria-pressed', String(state.enabled));
+  const filterStatus = state.updatedAt
+    ? `listes actualisées le ${historyDateFormat.format(new Date(state.updatedAt))}`
+    : 'filtres de secours actifs';
+  $('adBlockerSummary').textContent = `${state.blockedCount} requête${state.blockedCount === 1 ? '' : 's'} bloquée${state.blockedCount === 1 ? '' : 's'} depuis l’ouverture du navigateur · ${state.filterCount.toLocaleString('fr-FR')} règles chargées · ${filterStatus}`;
+  $('adBlockerSite').textContent = state.currentDomain
+    ? `Site actuel : ${state.currentDomain}${state.isAllowlisted ? ' · blocage désactivé ici' : ''}`
+    : 'Ouvrez un site HTTP ou HTTPS pour gérer son exception.';
+  $('toggleAdBlockerSite').disabled = !state.currentDomain;
+  $('toggleAdBlockerSite').textContent = state.isAllowlisted
+    ? 'Réactiver le blocage sur ce site'
+    : 'Désactiver le blocage sur ce site';
 }
 
 function formatBytes(bytes) {
@@ -164,6 +190,7 @@ window.nova.onDownloadsState((next) => {
   downloads = next;
   renderDownloads();
 });
+window.nova.onAdBlockerState(renderAdBlocker);
 
 function renderHistory(entries) {
   historyList.replaceChildren();
@@ -206,6 +233,8 @@ $('history').addEventListener('click', async () => {
     renderHistory(await window.nova.openHistory());
     downloadsPanel.classList.remove('visible');
     downloadsPanel.setAttribute('aria-hidden', 'true');
+    adBlockerPanel.classList.remove('visible');
+    adBlockerPanel.setAttribute('aria-hidden', 'true');
     historyPanel.classList.add('visible');
     historyPanel.setAttribute('aria-hidden', 'false');
   } catch {
@@ -234,10 +263,55 @@ $('downloads').addEventListener('click', async () => {
     renderDownloads();
     historyPanel.classList.remove('visible');
     historyPanel.setAttribute('aria-hidden', 'true');
+    adBlockerPanel.classList.remove('visible');
+    adBlockerPanel.setAttribute('aria-hidden', 'true');
     downloadsPanel.classList.add('visible');
     downloadsPanel.setAttribute('aria-hidden', 'false');
   } catch {
     notify('Impossible de charger les téléchargements.');
+  }
+});
+$('adBlocker').addEventListener('click', async () => {
+  try {
+    renderAdBlocker(await window.nova.openAdBlocker());
+    historyPanel.classList.remove('visible');
+    historyPanel.setAttribute('aria-hidden', 'true');
+    downloadsPanel.classList.remove('visible');
+    downloadsPanel.setAttribute('aria-hidden', 'true');
+    adBlockerPanel.classList.add('visible');
+    adBlockerPanel.setAttribute('aria-hidden', 'false');
+  } catch {
+    notify('Impossible de charger les paramètres du bloqueur.');
+  }
+});
+$('closeAdBlocker').addEventListener('click', async () => {
+  try {
+    await window.nova.closeAdBlocker();
+    hidePanels();
+  } catch {
+    notify('Impossible de fermer les paramètres du bloqueur.');
+  }
+});
+$('toggleAdBlocker').addEventListener('click', async () => {
+  try {
+    renderAdBlocker(await window.nova.setAdBlockerEnabled(!adBlockerState.enabled));
+  } catch {
+    notify('Impossible de modifier le bloqueur.');
+  }
+});
+$('toggleAdBlockerSite').addEventListener('click', async () => {
+  try {
+    renderAdBlocker(await window.nova.toggleAdBlockerSite());
+  } catch {
+    notify('Impossible de modifier l’exception de ce site.');
+  }
+});
+$('refreshAdBlocker').addEventListener('click', async () => {
+  try {
+    renderAdBlocker(await window.nova.refreshAdBlockerFilters());
+    notify('Filtres mis à jour.');
+  } catch {
+    notify('Impossible de mettre à jour les filtres.');
   }
 });
 $('closeDownloads').addEventListener('click', async () => {

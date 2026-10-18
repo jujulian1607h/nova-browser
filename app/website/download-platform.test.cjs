@@ -10,8 +10,8 @@ test('detects Windows and selects its installer', () => {
 
 test('detects Linux and selects the AppImage by default', () => {
   assert.equal(detectPlatform('Linux x86_64'), 'linux');
-  assert.match(getDownload(detectPlatform('Linux x86_64')).url, /Night-Browser-1\.0\.5-x86_64\.AppImage$/);
-  assert.match(getDownload('deb').url, /Night-Browser-1\.0\.5-amd64\.deb$/);
+  assert.ok(getDownload(detectPlatform('Linux x86_64')).url.endsWith('Night-Browser-1.1.0-x86_64.AppImage'));
+  assert.ok(getDownload('deb').url.endsWith('Night-Browser-1.1.0-amd64.deb'));
 });
 
 test('does not guess unsupported platforms', () => {
