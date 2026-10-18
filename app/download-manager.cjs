@@ -5,7 +5,7 @@ const { randomUUID } = require('node:crypto');
 const MAX_DOWNLOADS = 100;
 
 function getSafeFileName(fileName) {
-  const safeName = path.basename(fileName).replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim();
+  const safeName = fileName.split(/[\\/]/).pop().replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim();
   return safeName && safeName !== '.' && safeName !== '..' ? safeName : 'download';
 }
 
