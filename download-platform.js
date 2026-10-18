@@ -6,12 +6,12 @@
       info: 'Version 1.0.5 · Windows 10/11 · 64 bits'
     },
     linux: {
-      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-x64.AppImage',
+      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-x86_64.AppImage',
       label: 'Télécharger pour Linux (AppImage)',
       info: 'Version 1.0.5 · Linux x86_64 · AppImage'
     },
     deb: {
-      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-x64.deb',
+      url: 'https://github.com/jujulian1607h/nova-browser/releases/download/v1.0.5/Night-Browser-1.0.5-amd64.deb',
       label: 'Télécharger pour Debian / Ubuntu (.deb)',
       info: 'Version 1.0.5 · Debian / Ubuntu · x86_64'
     }
