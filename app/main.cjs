@@ -213,6 +213,10 @@ function navigate(input) {
 
 function configureAutoUpdates() {
   if (!app.isPackaged) return;
+  if (process.platform === 'linux' && !process.env.APPIMAGE) {
+    reportBrowserError('Les mises à jour automatiques sont disponibles avec la version AppImage.');
+    return;
+  }
 
   autoUpdater.on('update-available', () => {
     reportBrowserError('Mise à jour disponible : téléchargement en cours.');
