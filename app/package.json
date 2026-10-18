@@ -2,6 +2,7 @@
   "name": "nova-browser",
   "version": "1.0.5",
   "description": "Night Browser - navigateur de bureau Electron",
+  "homepage": "https://jujulian1607h.github.io/nova-browser/",
   "main": "main.cjs",
   "author": "NOVA",
   "license": "MIT",
