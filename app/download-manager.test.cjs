@@ -1,14 +1,16 @@
 const assert = require('node:assert/strict');
 const { EventEmitter } = require('node:events');
+const path = require('node:path');
 const test = require('node:test');
 const { DownloadManager, getSafeFileName, getUniqueDownloadPath } = require('./download-manager.cjs');
 
 test('sanitizes download names and avoids overwriting existing files', () => {
   assert.equal(getSafeFileName('..\\unsafe:name?.exe'), 'unsafe_name_.exe');
-  const existing = new Set(['C:\\Downloads\\file.zip', 'C:\\Downloads\\file (1).zip']);
+  const directory = path.join('downloads');
+  const existing = new Set([path.join(directory, 'file.zip'), path.join(directory, 'file (1).zip')]);
   assert.equal(
-    getUniqueDownloadPath('C:\\Downloads', 'file.zip', (candidate) => existing.has(candidate)),
-    'C:\\Downloads\\file (2).zip'
+    getUniqueDownloadPath(directory, 'file.zip', (candidate) => existing.has(candidate)),
+    path.join(directory, 'file (2).zip')
   );
 });
 
@@ -16,7 +18,7 @@ test('tracks download progress and completion for the manager panel', async () =
   const snapshots = [];
   const downloadSession = new EventEmitter();
   const manager = new DownloadManager({
-    directory: 'C:\\Downloads',
+    directory: path.join('downloads'),
     onChange: (downloads) => snapshots.push(downloads),
     onError: assert.fail,
     openPath: async () => '',
@@ -49,7 +51,7 @@ test('tracks download progress and completion for the manager panel', async () =
 test('isolates download sessions and labels private downloads', () => {
   const snapshots = [];
   const manager = new DownloadManager({
-    directory: 'C:\\Downloads',
+    directory: path.join('downloads'),
     onChange: (downloads) => snapshots.push(downloads),
     onError: assert.fail,
     openPath: async () => '',
@@ -74,7 +76,7 @@ test('isolates download sessions and labels private downloads', () => {
 
 test('reserves unique destinations for simultaneous downloads with the same name', () => {
   const manager = new DownloadManager({
-    directory: 'C:\\Downloads',
+    directory: path.join('downloads'),
     onChange: () => {},
     onError: assert.fail,
     openPath: async () => '',
@@ -98,6 +100,6 @@ test('reserves unique destinations for simultaneous downloads with the same name
   downloadSession.emit('will-download', {}, first);
   downloadSession.emit('will-download', {}, second);
 
-  assert.equal(first.savePath, 'C:\\Downloads\\same.zip');
-  assert.equal(second.savePath, 'C:\\Downloads\\same (1).zip');
+  assert.equal(first.savePath, path.join('downloads', 'same.zip'));
+  assert.equal(second.savePath, path.join('downloads', 'same (1).zip'));
 });
