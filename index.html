@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080a12">
   <meta name="description" content="Découvrez Night Browser pour Windows et Linux : navigateur au design futuriste, avec onglets, favoris, historique et téléchargements.">
+  <link rel="icon" type="image/png" href="nova-logo.png">
   <meta property="og:title" content="Night Browser — Explorez autrement">
   <meta property="og:description" content="Un navigateur pour Windows et Linux au design nocturne, prêt à explorer le web.">
   <meta property="og:type" content="website">
@@ -36,11 +37,7 @@
     .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
     .nav { display: flex; align-items: center; justify-content: space-between; padding: 25px 0; }
     .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 800; letter-spacing: .13em; }
-    .brand-mark {
-      display: grid; place-items: center; width: 35px; height: 35px; border-radius: 12px;
-      color: #0a0b13; background: linear-gradient(135deg, var(--blue), var(--purple));
-      box-shadow: 0 0 25px rgba(168, 139, 255, .25); font-size: 19px;
-    }
+    .brand-mark { display: block; width: 36px; height: 36px; object-fit: contain; }
     .nav-link { color: var(--muted); text-decoration: none; font-size: .9rem; }
     .nav-link:hover, .text-link:hover { color: var(--text); }
     .hero { display: grid; grid-template-columns: 1fr 1.04fr; align-items: center; gap: 55px; padding: 72px 0 95px; }
@@ -109,7 +106,7 @@
 </head>
 <body>
   <header class="shell nav">
-    <a class="brand" href="#" aria-label="Night Browser, accueil"><span class="brand-mark" aria-hidden="true">N</span><span>NIGHT BROWSER</span></a>
+    <a class="brand" href="#" aria-label="Night Browser, accueil"><img class="brand-mark" src="nova-logo.png" alt=""><span>NIGHT BROWSER</span></a>
     <a class="nav-link" href="#fonctionnalites">Découvrir <span aria-hidden="true">↘</span></a>
   </header>
 
