@@ -4,14 +4,18 @@ const { randomUUID } = require('node:crypto');
 const path = require('node:path');
 const { HistoryStore } = require('./history-store.cjs');
 const { DownloadManager } = require('./download-manager.cjs');
+const { AdBlocker } = require('./ad-blocker.cjs');
 
 let win;
+let rendererReady = false;
 let tabs = new Map();
 let activeTabId = null;
 let nextTabId = 1;
 let activePanel = null;
+let pendingAdBlockerError = false;
 const historyStore = new HistoryStore(path.join(app.getPath('userData'), 'history.json'));
 const TOOLBAR_HEIGHT = 112;
+let adBlockerStateTimeout;
 const downloadManager = new DownloadManager({
   directory: app.getPath('downloads'),
   onChange: (downloads) => {
@@ -20,6 +24,33 @@ const downloadManager = new DownloadManager({
   onError: reportBrowserError,
   openPath: (filePath) => shell.openPath(filePath),
   revealPath: (filePath) => shell.showItemInFolder(filePath)
+});
+const adBlocker = new AdBlocker({
+  settingsPath: path.join(app.getPath('userData'), 'ad-blocker-settings.json'),
+  cachePath: path.join(app.getPath('userData'), 'ad-blocker-filters.json'),
+  onBlocked: () => {
+    if (adBlockerStateTimeout) return;
+    adBlockerStateTimeout = setTimeout(() => {
+      adBlockerStateTimeout = null;
+      sendAdBlockerState();
+    }, 250);
+  },
+  onError: (error) => {
+    console.error('Le bloqueur de publicités de Night Browser a rencontré une erreur:', error);
+    if (!rendererReady) {
+      pendingAdBlockerError = true;
+    } else {
+      reportBrowserError('Impossible de mettre à jour les filtres du bloqueur. Les filtres déjà chargés restent actifs.');
+    }
+  },
+  getDocumentUrl: (webContentsId, referrer) => {
+    for (const tab of tabs.values()) {
+      if (tab.view.webContents.id === webContentsId) {
+        return tab.view.webContents.getURL() || referrer || '';
+      }
+    }
+    return referrer || '';
+  }
 });
 
 function reportBrowserError(message) {
@@ -64,6 +95,17 @@ function sendState() {
     canGoForward: view.webContents.navigationHistory.canGoForward()
   }));
   win.webContents.send('tabs:state', { tabs: list, activeTabId });
+  sendAdBlockerState();
+}
+
+function sendAdBlockerState() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send('adblocker:state', getAdBlockerState());
+}
+
+function getAdBlockerState() {
+  const tab = activeTab();
+  return adBlocker.getState(tab?.view.webContents.getURL() || tab?.url || '');
 }
 
 function setViewBounds() {
@@ -99,6 +141,14 @@ function recordVisit(tab, url) {
 function attachTabEvents(tab) {
   const wc = tab.view.webContents;
   wc.setWindowOpenHandler(({ url }) => {
+    if (adBlocker.shouldBlock({
+      url,
+      documentUrl: wc.getURL(),
+      type: 'other'
+    }, true)) {
+      adBlocker.recordBlockedRequest();
+      return { action: 'deny' };
+    }
     createTab(url, tab.privateMode);
     return { action: 'deny' };
   });
@@ -153,6 +203,7 @@ function createTab(initialUrl = 'https://www.google.com/', privateMode = false) 
     }
   });
   downloadManager.attachSession(view.webContents.session, privateMode);
+  adBlocker.enableInSession(view.webContents.session);
   const tab = { id, view, title: 'Nouvel onglet', url: '', loading: false, privateMode };
   tabs.set(id, tab);
   win.contentView.addChildView(view);
@@ -259,6 +310,7 @@ function createWindow() {
   win.on('closed', () => {
     tabs.clear();
     win = null;
+    rendererReady = false;
   });
   win.webContents.setWindowOpenHandler(({ url }) => {
     // Links opened by the app shell are sent to the system browser only for HTTP(S).
@@ -268,11 +320,18 @@ function createWindow() {
     } catch {}
     return { action: 'deny' };
   });
-  win.webContents.once('did-finish-load', () => createTab());
+  win.webContents.once('did-finish-load', () => {
+    rendererReady = true;
+    createTab();
+    if (pendingAdBlockerError) {
+      pendingAdBlockerError = false;
+      reportBrowserError('Impossible de mettre à jour les filtres du bloqueur. Les filtres déjà chargés restent actifs.');
+    }
+  });
   win.webContents.once('did-finish-load', configureAutoUpdates);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   ipcMain.handle('tabs:new', (_e, url, privateMode = false) => createTab(url, Boolean(privateMode)));
   ipcMain.handle('tabs:activate', (_e, id) => activateTab(id));
   ipcMain.handle('tabs:close', (_e, id) => closeTab(id));
@@ -321,7 +380,46 @@ app.whenReady().then(() => {
   ipcMain.handle('downloads:cancel', (_event, id) => downloadManager.cancel(id));
   ipcMain.handle('downloads:open-file', (_event, id) => downloadManager.open(id));
   ipcMain.handle('downloads:show-file', (_event, id) => downloadManager.reveal(id));
+  ipcMain.handle('adblocker:open', () => {
+    activePanel = 'adblocker';
+    for (const tab of tabs.values()) tab.view.setVisible(false);
+    setViewBounds();
+    return getAdBlockerState();
+  });
+  ipcMain.handle('adblocker:close', () => {
+    if (activePanel !== 'adblocker') return;
+    activePanel = null;
+    if (activeTabId !== null) activateTab(activeTabId);
+  });
+  ipcMain.handle('adblocker:toggle', async (_event, enabled) => {
+    await adBlocker.setEnabled(enabled);
+    sendAdBlockerState();
+    return getAdBlockerState();
+  });
+  ipcMain.handle('adblocker:toggle-site', async () => {
+    const tab = activeTab();
+    const url = tab?.view.webContents.getURL() || tab?.url || '';
+    await adBlocker.toggleException(url);
+    sendAdBlockerState();
+    return getAdBlockerState();
+  });
+  ipcMain.handle('adblocker:refresh', async () => {
+    try {
+      await adBlocker.refreshFilters();
+      sendAdBlockerState();
+      return getAdBlockerState();
+    } catch (error) {
+      console.error('Impossible de télécharger les filtres du bloqueur:', error);
+      throw error;
+    }
+  });
 
+  try {
+    await adBlocker.initialize();
+  } catch (error) {
+    console.error('Impossible d’initialiser le bloqueur de publicités:', error);
+    reportBrowserError('Le bloqueur de publicités n’a pas pu être initialisé.');
+  }
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

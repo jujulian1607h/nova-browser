@@ -1,6 +1,6 @@
-# Night Browser 1.0.5 — Windows et Linux
+# Night Browser 1.1.0 — Windows et Linux
 
-Night Browser est un navigateur Electron avec une vraie zone de navigation intégrée (pas d'iframe), plusieurs onglets, recherche web, favoris locaux, onglets privés, historique et gestionnaire de téléchargements.
+Night Browser est un navigateur Electron avec une vraie zone de navigation intégrée (pas d'iframe), plusieurs onglets, recherche web, favoris locaux, onglets privés, historique, bloqueur de publicités et gestionnaire de téléchargements.
 
 Site de présentation et téléchargement : https://jujulian1607h.github.io/nova-browser/
 
@@ -39,14 +39,14 @@ Les paquets AppImage et Debian x86_64 sont créés dans `release`.
 ### Lancer l’AppImage
 
 ```sh
-chmod +x Night-Browser-1.0.5-x86_64.AppImage
-./Night-Browser-1.0.5-x86_64.AppImage
+chmod +x Night-Browser-1.1.0-x86_64.AppImage
+./Night-Browser-1.1.0-x86_64.AppImage
 ```
 
 ### Installer sur Debian ou Ubuntu
 
 ```sh
-sudo apt install ./Night-Browser-1.0.5-amd64.deb
+sudo apt install ./Night-Browser-1.1.0-amd64.deb
 ```
 
 ## Publication et mises à jour
@@ -63,6 +63,7 @@ L’application vérifie les mises à jour au démarrage. L’AppImage Linux pre
 - Retour, suivant, actualisation et accueil
 - Historique local des 1 000 dernières visites, consultable avec le bouton d’historique ou Ctrl+H et effaçable à la demande
 - Gestionnaire de téléchargements intégré à la barre d’outils (Ctrl+J), avec progression, annulation et accès aux fichiers terminés
+- Bloqueur de publicités et de traqueurs réseau, activé par défaut avec filtres EasyList et EasyPrivacy actualisés quotidiennement, exceptions par site et compteur
 - Barre de navigation, fenêtre et onglets compacts
 - Favoris enregistrés localement sur cet ordinateur
 - Onglets privés isolés dans des partitions non persistantes
@@ -71,6 +72,7 @@ L’application vérifie les mises à jour au démarrage. L’AppImage Linux pre
 ## Notes importantes
 
 - Le mode privé isole les cookies et le stockage de la session normale ; il ne rend pas anonyme sur Internet et ne protège pas contre les sites, le réseau ou le fournisseur d'accès.
+- Le bloqueur filtre les requêtes réseau. Les filtres sont téléchargés et actualisés en ligne, puis conservés localement ; certaines publicités intégrées directement dans les pages peuvent toujours apparaître.
 - Les favoris et l’historique sont enregistrés localement sur cet ordinateur. L’historique est limité aux 1 000 visites récentes ; les onglets privés n’y figurent pas.
 - L’AppImage et l’installateur Windows ne sont pas signés numériquement. Vérifiez l’empreinte SHA-256 publiée avec chaque version et n’installez les fichiers que si vous faites confiance à leur provenance.
 - Le paquet `.deb` n’est pris en charge que sur les distributions Debian et Ubuntu en 64 bits.
